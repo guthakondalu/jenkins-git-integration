@@ -1,7 +1,13 @@
 node {
 
     agent any
+    
     stages {
+
+        stage('SCM') {
+    git 'https://github.com/guthakondalu/jenkins-git-integration.git'
+  }
+   
         stage('stage 1') {
             steps {
                 echo "I need to run every time"
