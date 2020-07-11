@@ -7,6 +7,31 @@ node {
       sh 'mvn clean package sonar:sonar'
     } // submitted SonarQube taskId is automatically attached to the pipeline context
   }
+
+ stage('Build') {
+         sh 'mvn clean package sonar:sonar'
+   
+  }
+
+   stage('Unit Tests') {
+   
+      sh 'mvn clean package sonar:sonar'
+    
+  }
+
+   stage('Deploy') {
+    
+      sh 'mvn test'
+    
+  }
+
+   stage('Regression') {
+    
+      echo 'Regression'
+    
+  }
+
+
 }
   
 // No need to occupy a node
