@@ -1,4 +1,25 @@
 node {
+
+    agent any
+    stages {
+        stage('stage 1') {
+            steps {
+                echo "I need to run every time"
+            }
+        }
+        stage('stage 2') {
+            steps {
+                echo "I need to run every time, even if stage 1 fails"
+            }
+        }
+        stage('stage 3') {
+            steps {
+                echo "Bonus points if the solution is robust enough to allow me to continue *or* be halted based on previous stage status"
+            }
+        }
+    }
+
+  /*  
   stage('SCM') {
     git 'https://github.com/guthakondalu/jenkins-git-integration.git'
   }
@@ -29,7 +50,7 @@ node {
     
       echo 'Regression'
     
-  }
+  }*/
 
 
 }
