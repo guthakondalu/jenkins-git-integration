@@ -1,72 +1,93 @@
-node {
+/* pipeline {
+	agent any
+	stages {
+		stage ('build') {
+			echo ''
+		}
+		stage ('test: integration-&-quality') {
+			...
+		}
+		stage ('test: functional') {
+			...
+		}
+		stage ('test: load-&-security') {
+			...
+		}
+		stage ('approval') {
+			...
+		}
+		stage ('deploy:prod') {
+			...
+		}
+	} */
 
+pipeline {
     agent any
-    
+
+    environment {
+        DONT_COLLECT = 'FOO'
+    }
+
     stages {
+        stage ('Clone') {
+            steps {
+                git branch: 'master', url: "https://github.com/guthakondalu/jenkins-git-integration.git"
+            }
+        }
 
-        stage('SCM') {
-    git 'https://github.com/guthakondalu/jenkins-git-integration.git'
-  }
-   
-        stage('stage 1') {
+        stage ('Artifactory configuration') {
             steps {
-                echo "I need to run every time"
+                rtServer (
+                    id: "ARTIFACTORY_SERVER",
+                    url: SERVER_URL,
+                    credentialsId: CREDENTIALS
+                )
+
+                rtGradleDeployer (
+                    id: "GRADLE_DEPLOYER",
+                    serverId: "ARTIFACTORY_SERVER",
+                    repo: "libs-snapshot-local",
+                    excludePatterns: ["*.war"],
+                )
+
+                rtGradleResolver (
+                    id: "GRADLE_RESOLVER",
+                    serverId: "ARTIFACTORY_SERVER",
+                    repo: "jcenter"
+                )
             }
         }
-        stage('stage 2') {
+
+        stage ('Config Build Info') {
             steps {
-                echo "I need to run every time, even if stage 1 fails"
+                rtBuildInfo (
+                    captureEnv: true,
+                    includeEnvPatterns: ["*"],
+                    excludeEnvPatterns: ["DONT_COLLECT*"]
+                )
             }
         }
-        stage('stage 3') {
+
+        stage ('Exec Gradle') {
             steps {
-                echo "Bonus points if the solution is robust enough to allow me to continue *or* be halted based on previous stage status"
+                rtGradleRun (
+                    usesPlugin: true, // Artifactory plugin already defined in build script
+                    tool: GRADLE_TOOL, // Tool name from Jenkins configuration
+                    rootDir: "gradle-examples/gradle-example/",
+                    buildFile: 'build.gradle',
+                    tasks: 'clean artifactoryPublish',
+                    deployerId: "GRADLE_DEPLOYER",
+                    resolverId: "GRADLE_RESOLVER"
+                )
+            }
+        }
+
+        stage ('Publish build info') {
+            steps {
+                rtPublishBuildInfo (
+                    serverId: "ARTIFACTORY_SERVER"
+                )
             }
         }
     }
-
-  /*  
-  stage('SCM') {
-    git 'https://github.com/guthakondalu/jenkins-git-integration.git'
-  }
-  //stage('SonarQube analysis') {
-  //  withSonarQubeEnv('My SonarQube Server') {
-  //    sh 'mvn clean package sonar:sonar'
-  //  } // submitted SonarQube taskId is automatically attached to the pipeline context
-  //}
-
- stage('Build') {
-         sh 'mvn clean package'
-   
-  }
-
-   stage('Unit Tests') {
-   
-      sh 'mvn clean package'
-    
-  }
-
-   stage('Deploy') {
-    
-      sh 'mvn test'
-    
-  }
-
-   stage('Regression') {
-    
-      echo 'Regression'
-    
-  }*/
-
-
-}
-  
-// No need to occupy a node
-stage("Quality Gate"){
-  timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
-    def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-    if (qg.status != 'OK') {
-      error "Pipeline aborted due to quality gate failure: ${qg.status}"
-    }
-  }
 }
