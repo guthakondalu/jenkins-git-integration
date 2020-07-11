@@ -2,20 +2,20 @@ node {
   stage('SCM') {
     git 'https://github.com/guthakondalu/jenkins-git-integration.git'
   }
-  stage('SonarQube analysis') {
-    withSonarQubeEnv('My SonarQube Server') {
-      sh 'mvn clean package sonar:sonar'
-    } // submitted SonarQube taskId is automatically attached to the pipeline context
-  }
+  //stage('SonarQube analysis') {
+  //  withSonarQubeEnv('My SonarQube Server') {
+  //    sh 'mvn clean package sonar:sonar'
+  //  } // submitted SonarQube taskId is automatically attached to the pipeline context
+  //}
 
  stage('Build') {
-         sh 'mvn clean package sonar:sonar'
+         sh 'mvn clean package'
    
   }
 
    stage('Unit Tests') {
    
-      sh 'mvn clean package sonar:sonar'
+      sh 'mvn clean package'
     
   }
 
