@@ -37,57 +37,26 @@ pipeline {
 
         stage ('Artifactory configuration') {
             steps {
-                rtServer (
-                    id: "ARTIFACTORY_SERVER",
-                    url: SERVER_URL,
-                    credentialsId: CREDENTIALS
-                )
-
-                rtGradleDeployer (
-                    id: "GRADLE_DEPLOYER",
-                    serverId: "ARTIFACTORY_SERVER",
-                    repo: "libs-snapshot-local",
-                    excludePatterns: ["*.war"],
-                )
-
-                rtGradleResolver (
-                    id: "GRADLE_RESOLVER",
-                    serverId: "ARTIFACTORY_SERVER",
-                    repo: "jcenter"
-                )
-            }
+                echo "Artifactory configuration"
+                }
         }
 
         stage ('Config Build Info') {
-            steps {
-                rtBuildInfo (
-                    captureEnv: true,
-                    includeEnvPatterns: ["*"],
-                    excludeEnvPatterns: ["DONT_COLLECT*"]
-                )
-            }
+             steps {
+                echo "Config Build Info"
+                }
         }
 
         stage ('Exec Gradle') {
-            steps {
-                rtGradleRun (
-                    usesPlugin: true, // Artifactory plugin already defined in build script
-                    tool: GRADLE_TOOL, // Tool name from Jenkins configuration
-                    rootDir: "gradle-examples/gradle-example/",
-                    buildFile: 'build.gradle',
-                    tasks: 'clean artifactoryPublish',
-                    deployerId: "GRADLE_DEPLOYER",
-                    resolverId: "GRADLE_RESOLVER"
-                )
-            }
+             steps {
+                echo "Exec Gradle"
+                }
         }
 
         stage ('Publish build info') {
-            steps {
-                rtPublishBuildInfo (
-                    serverId: "ARTIFACTORY_SERVER"
-                )
-            }
+             steps {
+                echo "Publish Build Info"
+                }
         }
     }
 }
