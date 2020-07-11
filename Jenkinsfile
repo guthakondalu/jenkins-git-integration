@@ -43,7 +43,7 @@ pipeline {
 
         stage ('Config Build Info') {
              steps {
-                sh "mvn clean package"
+                bash -c "mvn clean package"
                 }
         }
 
