@@ -29,19 +29,19 @@ pipeline {
     }
 
     stages {
-        stage ('Clone') {
+        stage ('build') {
             steps {
                 git branch: 'master', url: "https://github.com/guthakondalu/jenkins-git-integration.git"
             }
         }
 
-        stage ('Artifactory configuration') {
+        stage ('test') {
             steps {
                 echo "Artifactory configuration"
                 }
         }
 
-        stage ('Config Build Info') {
+        stage ('deplpoy') {
              steps {
                     echo "Build information"
                 }
@@ -57,6 +57,14 @@ pipeline {
              steps {
                 echo "Publish Build Info"
                 }
+        }
+    }
+    post{
+        always{
+            echo "Build success"
+        }
+        failure{
+            echo "Build Failed"
         }
     }
 }
