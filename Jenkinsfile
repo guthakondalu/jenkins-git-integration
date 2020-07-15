@@ -43,7 +43,7 @@ pipeline {
 
         stage ('Config Build Info') {
              steps {
-                    mvn clean package
+                    echo "Build information"
                 }
         }
 
